@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>低电量宝宝安慰站</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Microsoft YaHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, #ffe5ef 0, transparent 35%),
+        radial-gradient(circle at bottom right, #fff0c9 0, transparent 35%),
+        linear-gradient(135deg, #fff8fb, #fff3e4);
+      color: #5b3f45;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+      min-height: 680px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 190, 210, 0.6);
+      border-radius: 32px;
+      box-shadow: 0 20px 50px rgba(255, 160, 190, 0.25);
+      padding: 26px 22px;
+      backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bubble {
+      position: absolute;
+      border-radius: 999px;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .bubble.one {
+      width: 110px;
+      height: 110px;
+      background: #ffd1df;
+      right: -35px;
+      top: 80px;
+    }
+
+    .bubble.two {
+      width: 90px;
+      height: 90px;
+      background: #ffe1a8;
+      left: -30px;
+      bottom: 120px;
+    }
+
+    .header {
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .emoji {
+      font-size: 54px;
+      margin-bottom: 8px;
+      animation: float 2.8s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 30px;
+      color: #4f333a;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      margin: 10px 0 22px;
+      font-size: 15px;
+      color: #8a6970;
+    }
+
+    .battery-card {
+      background: #fff7fa;
+      border: 1px solid #ffd6e1;
+      border-radius: 24px;
+      padding: 18px;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .battery-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #7c5c62;
+    }
+
+    .battery-shell {
+      width: 100%;
+      height: 22px;
+      border-radius: 999px;
+      background: #f3dfe5;
+      overflow: hidden;
+      border: 2px solid #efc7d2;
+    }
+
+    .battery-fill {
+      width: 23%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ff9fba, #ffc66d);
+      transition: width 0.5s ease;
+    }
+
+    .message-card {
+      min-height: 150px;
+      background: linear-gradient(145deg, #ffffff, #fff6f8);
+      border-radius: 28px;
+      border: 1px solid #ffd6e1;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7);
+      padding: 24px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .message {
+      font-size: 19px;
+      line-height: 1.7;
+      color: #5a3b42;
+    }
+
+    .main-btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 16px 20px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, #ff8fb2, #ffb86c);
+      box-shadow: 0 10px 24px rgba(255, 143, 178, 0.35);
+      cursor: pointer;
+      transition: 0.18s ease;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .main-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 6px 14px rgba(255, 143, 178, 0.28);
+    }
+
+    .moods {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mood-btn {
+      border: none;
+      border-radius: 18px;
+      padding: 12px 10px;
+      background: #fff1f5;
+      color: #6a4a51;
+      font-size: 15px;
+      cursor: pointer;
+      border: 1px solid #ffd4df;
+      transition: 0.15s ease;
+    }
+
+    .mood-btn:active {
+      transform: scale(0.96);
+      background: #ffe5ed;
+    }
+
+    .license {
+      background: #fffaf0;
+      border: 1px dashed #f1bf7a;
+      border-radius: 22px;
+      padding: 14px 16px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #735542;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .small-actions {
+      display: flex;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .small-btn {
+      flex: 1;
+      border: none;
+      border-radius: 18px;
+      padding: 12px;
+      background: #f9e9ff;
+      color: #6a4d74;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #e9cafa;
+    }
+
+    .small-btn:nth-child(2) {
+      background: #eef8ff;
+      border-color: #c7e7ff;
+      color: #4b6170;
+    }
+    .photo-card,
+.chat-card {
+  background: #fff7fa;
+  border: 1px solid #ffd6e1;
+  border-radius: 24px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.photo-card h2,
+.chat-card h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #5a3b42;
+}
+
+.photo-card p {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #8a6970;
+}
+
+.upload-label {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #ffe7ef;
+  border: 1px solid #ffc7d8;
+  color: #6a4a51;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.upload-label input {
+  display: none;
+}
+
+.photo-preview {
+  width: 100%;
+  min-height: 160px;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px dashed #ffc7d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a4868d;
+  overflow: hidden;
+}
+
+.photo-preview img {
+  width: 100%;
+  height: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.chat-box {
+  height: 210px;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid #ffd6e1;
+  border-radius: 20px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.chat {
+  max-width: 82%;
+  padding: 10px 12px;
+  border-radius: 18px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.chat.bot {
+  background: #fff0f5;
+  color: #5a3b42;
+  border-bottom-left-radius: 6px;
+}
+
+.chat.user {
+  background: #ffe1ae;
+  color: #5a3b42;
+  margin-left: auto;
+  border-bottom-right-radius: 6px;
+}
+
+.chat-input-area {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  border: 1px solid #ffd0dc;
+  border-radius: 999px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+  color: #5a3b42;
+}
+
+.chat-input-area button {
+  border: none;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #ff8fb2, #ffb86c);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      color: #a4868d;
+      font-size: 13px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(78, 55, 62, 0.9);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 380px) {
+      .app {
+        min-height: 640px;
+        padding: 22px 18px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .message {
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <div class="bubble one"></div>
+    <div class="bubble two"></div>
+
+    <section class="header">
+      <div class="emoji" id="mainEmoji">🪫</div>
+      <h1>低电量宝宝安慰站</h1>
+      <p class="subtitle">没关系，今天先给宝宝充一点点电。</p>
+    </section>
+
+    <section class="battery-card">
+      <div class="battery-top">
+        <span>今日电量</span>
+        <strong id="batteryText">23%</strong>
+      </div>
+      <div class="battery-shell">
+        <div class="battery-fill" id="batteryFill"></div>
+      </div>
+    </section>
+
+    <section class="message-card">
+      <div class="message" id="message">
+        宝宝今天不想学习也没关系，先在这里躲一小会儿。
+      </div>
+    </section>
+
+    <button class="main-btn" id="comfortBtn">安慰我一下</button>
+
+    <section class="moods">
+      <button class="mood-btn" data-mood="tired">我很累</button>
+      <button class="mood-btn" data-mood="anxious">我很焦虑</button>
+      <button class="mood-btn" data-mood="lazy">我想摆烂</button>
+      <button class="mood-btn" data-mood="cry">我想哭</button>
+    </section>
+
+    <section class="license" id="license">
+      今日摆烂许可：允许休息 20 分钟，不许一边休息一边骂自己。
+    </section>
+    <section class="photo-card">
+  <h2>今日充电照片</h2>
+  <p>可以放一张让宝宝心情好一点的照片。</p>
+
+  <label class="upload-label">
+    选择照片
+    <input type="file" id="photoInput" accept="image/*" />
+  </label>
+
+  <div class="photo-preview" id="photoPreview">
+    <span>还没有照片哦 🧸</span>
+  </div>
+</section>
+
+<section class="chat-card">
+  <h2>和安慰站聊聊天</h2>
+
+  <div class="chat-box" id="chatBox">
+    <div class="chat bot">宝宝可以把不开心丢给我一点点。</div>
+  </div>
+
+  <div class="chat-input-area">
+    <input id="chatInput" type="text" placeholder="比如：我今天好累..." />
+    <button id="sendBtn">发送</button>
+  </div>
+</section>
+
+    <section class="small-actions">
+      <button class="small-btn" id="patBtn">摸摸头</button>
+      <button class="small-btn" id="restBtn">生成休息许可</button>
+    </section>
+
+    <footer class="footer">
+      已安慰宝宝 <span id="count">0</span> 次 · 当前模式：温柔充电
+    </footer>
+  </main>
+
+  <div class="toast" id="toast">摸摸头成功 +1</div>
+
+  <script>
+    const messages = {
+      normal: [
+        "今天不想学习也没关系，你不是机器，是需要充电的小动物。",
+        "你不是懒，你只是电量低了。",
+        "休息不是失败，是系统维护。",
+        "宝宝今天的任务不是变强，是先不要崩掉。",
+        "可以慢一点，真的可以，世界不会因为你今天少学一点就塌掉。",
+        "你已经很努力了，只是你太习惯忽略自己的累。",
+        "今天允许你低功率运行。",
+        "先被安慰一下，再决定要不要努力也来得及。",
+        "不用把每一天都过成冲刺赛，今天可以只是散步。",
+        "你没有坏掉，你只是需要一点温柔。"
+      ],
+      tired: [
+        "累了就先停一停，硬撑出来的效率也不会太高。",
+        "身体在提醒你：宝宝，该充电了。",
+        "休息不是偷懒，是为了不把自己烧坏。",
+        "今天可以只做一点点，哪怕只是打开文档看一眼，也算没有放弃。",
+        "先喝水，先坐好，先让自己缓过来。"
+      ],
+      anxious: [
+        "先别想全部任务，只想下一小步就好。",
+        "焦虑会把事情放大，但事情本身可能没有你脑子里那么可怕。",
+        "你不需要一下子解决全部问题，你只需要先稳住。",
+        "先呼吸，先慢下来，世界没有催你到不能喘气。",
+        "你现在不是做不到，你只是被压力吓住了。"
+      ],
+      lazy: [
+        "摆烂五分钟可以，宝宝拥有今日临时摆烂许可证。",
+        "允许你躺一下，但不要一边躺一边骂自己。",
+        "摆烂不是罪，摆烂后能爬起来一点点就很厉害。",
+        "系统检测到宝宝过载，已自动批准短暂摆烂。",
+        "今天先摆一小会儿，等电量回来再说。"
+      ],
+      cry: [
+        "想哭就哭一下，不用每次都装作很坚强。",
+        "眼泪不是退步，是压力找到了出口。",
+        "你已经很辛苦了，真的。",
+        "今天不用完美，今天只要平安过完就好。",
+        "你不是脆弱，你只是累得太久了。"
+      ]
+    };
+
+    const licenses = [
+      "今日摆烂许可：允许休息 10 分钟，期间禁止自责。",
+      "今日摆烂许可：允许抱着被子发呆 15 分钟。",
+      "今日摆烂许可：允许喝点甜的，然后再决定学不学。",
+      "今日摆烂许可：允许先睡一小会儿，醒来再说。",
+      "今日摆烂许可：允许只完成一个最小任务。",
+      "今日摆烂许可：允许今天低功率运行。",
+      "今日摆烂许可：允许把任务拆小，小到不吓人。"
+    ];
+
+    const emojis = ["🪫", "🥺", "🧸", "🍮", "☁️", "🌙", "🐾", "🍓"];
+
+    const messageEl = document.getElementById("message");
+    const comfortBtn = document.getElementById("comfortBtn");
+    const moodBtns = document.querySelectorAll(".mood-btn");
+    const batteryText = document.getElementById("batteryText");
+    const batteryFill = document.getElementById("batteryFill");
+    const licenseEl = document.getElementById("license");
+    const patBtn = document.getElementById("patBtn");
+    const restBtn = document.getElementById("restBtn");
+    const countEl = document.getElementById("count");
+    const toast = document.getElementById("toast");
+    const mainEmoji = document.getElementById("mainEmoji");
+
+    let battery = 23;
+    let count = Number(localStorage.getItem("comfortCount") || 0);
+    countEl.textContent = count;
+
+    function randomFrom(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function chargeBattery(amount = 7) {
+      battery = Math.min(100, battery + amount);
+      batteryText.textContent = battery + "%";
+      batteryFill.style.width = battery + "%";
+
+      if (battery >= 80) {
+        mainEmoji.textContent = "🔋";
+      } else if (battery >= 50) {
+        mainEmoji.textContent = "🌷";
+      } else {
+        mainEmoji.textContent = randomFrom(emojis);
+      }
+    }
+
+    function showMessage(type = "normal") {
+      messageEl.textContent = randomFrom(messages[type]);
+      chargeBattery(Math.floor(Math.random() * 8) + 4);
+
+      count++;
+      countEl.textContent = count;
+      localStorage.setItem("comfortCount", count);
+    }
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.add("show");
+
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 1400);
+    }
+
+    comfortBtn.addEventListener("click", () => {
+      showMessage("normal");
+    });
+
+    moodBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mood = btn.dataset.mood;
+        showMessage(mood);
+      });
+    });
+
+    patBtn.addEventListener("click", () => {
+      chargeBattery(5);
+      showToast("摸摸头成功，宝宝电量 +5%");
+    });
+
+    restBtn.addEventListener("click", () => {
+      licenseEl.textContent = randomFrom(licenses);
+      showToast("新的休息许可已生成");
+    });
+    const photoInput = document.getElementById("photoInput");
+const photoPreview = document.getElementById("photoPreview");
+
+photoInput.addEventListener("change", () => {
+  const file = photoInput.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    photoPreview.innerHTML = `<img src="${event.target.result}" alt="今日充电照片" />`;
+    showToast("今日充电照片已放好啦");
+    chargeBattery(8);
+  };
+
+  reader.readAsDataURL(file);
+});
+
+
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const chatBox = document.getElementById("chatBox");
+
+const botReplies = {
+  tired: [
+    "宝宝辛苦了，今天先不要逼自己满电运行。",
+    "累的时候就先停一下，不是你不行，是电量真的低了。",
+    "你已经撑了很久啦，现在可以先把自己放软一点。"
+  ],
+  anxious: [
+    "先别想全部事情，我们只需要处理眼前一小步。",
+    "焦虑会把任务变成怪兽，但宝宝不用一次打完整只怪兽。",
+    "你现在最重要的不是立刻变厉害，是先稳住呼吸。"
+  ],
+  sad: [
+    "不开心可以说出来一点点，我会在这里接住你。",
+    "今天难过也没关系，宝宝不是每天都要阳光灿烂。",
+    "你没有很差，你只是今天有点难过。"
+  ],
+  study: [
+    "不想学习的时候，可以只做一个小到离谱的任务，比如打开文件。",
+    "今天不需要卷成英雄，先学五分钟也算重新启动。",
+    "宝宝可以先休息，再回来摸一下任务，不用硬冲。"
+  ],
+  miss: [
+  "我也想你，想抱抱你。",
+  "我也在想你呀，刚刚还在心里偷偷念你。",
+  "想我啦？那我现在就抱住宝宝。",
+  "我也超级想你，想把你揣进口袋里带走。",
+  "收到宝宝的想念了，我这边心软软的。",
+  "我也想你，特别特别想。",
+  "那就靠近一点点，我把今天的温柔都给你。"
+],
+
+love: [
+  "爱你，超级爱你。",
+  "当然爱你呀，笨蛋宝宝。",
+  "爱你，不是敷衍，是很认真很认真地爱你。",
+  "我最喜欢你了，今天也是。",
+  "爱你呀，宝宝不用反复确认，我一直都在。",
+  "我的答案永远是：爱你。",
+  "爱你，抱抱，亲亲，再摸摸头。"
+],
+
+hug: [
+  "抱抱宝宝，抱紧一点。",
+  "来，抱住你了，今天先不用坚强。",
+  "抱抱，宝宝辛苦啦。",
+  "给你一个很久很久的抱抱。",
+  "抱住啦，宝宝现在可以软一点。",
+  "我在这里抱着你，不催你，也不怪你。"
+],
+
+kiss: [
+  "亲亲宝宝，啵。",
+  "亲一口，给宝宝充电。",
+  "啵啵，今天的亲亲额度无限供应。",
+  "亲亲你的小脑袋瓜，不许再偷偷难过。",
+  "过来，亲一下，再抱一下。",
+  "啵，宝宝电量 +10%。"
+],
+
+goodNight: [
+  "晚安宝宝，今天已经辛苦啦。",
+  "晚安，我会在梦里继续抱着你。",
+  "睡吧宝宝，明天醒来我们再慢慢来。",
+  "晚安，今天的不开心到这里就暂停。",
+  "宝宝乖乖睡觉，剩下的事情明天再说。",
+  "晚安，我爱你，梦里也要被温柔包围。"
+],
+
+goodMorning: [
+  "早安宝宝，今天也要被温柔对待。",
+  "早呀，醒来的第一件事是：宝宝被爱着。",
+  "早安，今天不需要完美，只需要慢慢来。",
+  "早安宝宝，给你一个刚出炉的抱抱。",
+  "新的一天开始啦，我还是很爱你。"
+],
+
+default: [
+    "我听到啦，宝宝今天已经很不容易了。",
+    "嗯嗯，把这句话放在这里就好，不用一个人憋着。",
+    "宝宝现在可以慢一点，软一点，不用马上变好。",
+    "你不是麻烦，你只是需要一点点安慰。",
+    "这里是低电量宝宝保护区，暂时不许自责。"
+  ]
+};
+
+function getBotReply(text) {
+  const lowerText = text.toLowerCase();
+  if (
+  text.includes("想你") ||
+  text.includes("想你了") ||
+  text.includes("好想你") ||
+  text.includes("我想你")
+) {
+  return randomFrom(botReplies.miss);
+}
+
+if (
+  text.includes("爱你") ||
+  text.includes("喜欢你") ||
+  text.includes("你爱我吗") ||
+  text.includes("爱不爱我")
+) {
+  return randomFrom(botReplies.love);
+}
+
+if (
+  text.includes("抱抱") ||
+  text.includes("抱我") ||
+  text.includes("想抱") ||
+  text.includes("抱一下")
+) {
+  return randomFrom(botReplies.hug);
+}
+
+if (
+  text.includes("亲亲") ||
+  text.includes("亲我") ||
+  text.includes("啵") ||
+  text.includes("亲一下")
+) {
+  return randomFrom(botReplies.kiss);
+}
+
+if (
+  text.includes("晚安") ||
+  text.includes("睡觉") ||
+  text.includes("困了") ||
+  text.includes("要睡了")
+) {
+  return randomFrom(botReplies.goodNight);
+}
+
+if (
+  text.includes("早安") ||
+  text.includes("早上好") ||
+  text.includes("醒了")
+) {
+  return randomFrom(botReplies.goodMorning);
+}
+
+  if (text.includes("累") || text.includes("困") || text.includes("疲惫")) {
+    return randomFrom(botReplies.tired);
+  }
+
+  if (text.includes("焦虑") || text.includes("害怕") || text.includes("压力")) {
+    return randomFrom(botReplies.anxious);
+  }
+
+  if (text.includes("难过") || text.includes("哭") || text.includes("委屈")) {
+    return randomFrom(botReplies.sad);
+  }
+
+  if (text.includes("学习") || text.includes("论文") || text.includes("作业") || text.includes("实验")) {
+    return randomFrom(botReplies.study);
+  }
+
+  return randomFrom(botReplies.default);
+}
+
+function addChatMessage(text, sender) {
+  const div = document.createElement("div");
+  div.className = `chat ${sender}`;
+  div.textContent = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function sendChat() {
+  const text = chatInput.value.trim();
+
+  if (!text) {
+    showToast("宝宝还没说话呢");
+    return;
+  }
+
+  addChatMessage(text, "user");
+  chatInput.value = "";
+
+  setTimeout(() => {
+    const reply = getBotReply(text);
+    addChatMessage(reply, "bot");
+    chargeBattery(4);
+  }, 450);
+}
+
+sendBtn.addEventListener("click", sendChat);
+
+chatInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    sendChat();
+  }
+});
+  </script>
+</body>
+</html>
